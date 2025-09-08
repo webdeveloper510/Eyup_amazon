@@ -89,12 +89,12 @@ def upload_asin_file(request):
                         resp = requests.get(url, headers=headers, params=params, timeout=20)
                         resp.raise_for_status()
                         data = resp.json()
-                        print("API Response:", data)
+                        # print("API Response:", data)
                     except Exception as e:
                         data = {"error": str(e)}
 
                     restrictions = data.get("restrictions", [])
-                    print("Restrictions:", restrictions)
+                    # print("Restrictions:", restrictions)
 
                     if restrictions:
                         sell_status = "APPLY TO SELL"
@@ -120,21 +120,6 @@ def upload_asin_file(request):
                 if os.path.exists(output_path):
                     os.remove(output_path)
                 result_df.to_excel(output_path, index=False)    
-                    
-
-                # Create updated DataFrame
-                # result_df = pd.DataFrame(results)
-
-                # Safe way to generate updated filename
-                # base, ext = os.path.splitext(file_path)
-                # output_path = f"{base}_updated.xlsx"
-
-                # Delete old file if exists
-                # if os.path.exists(output_path):
-                #     os.remove(output_path)
-
-                # result_df.to_excel(output_path, index=False)
-                # rows = result_df.to_dict(orient="records")
 
         except Exception as e:
             error = str(e)
@@ -164,22 +149,3 @@ def download_asin_results(request):
     df.to_excel(response, index=False)
 
     return response
-
-# def download_asin_results(request):
-#     """Download processed ASIN results as Excel"""
-#     asin_results = request.session.get("asin_results")
-#     if not asin_results:
-#         return HttpResponse("No results to download.", status=400)
-
-#     df = pd.DataFrame(asin_results)
-
-#     # Create Excel response
-#     response = HttpResponse(
-#         content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-#     )
-#     response["Content-Disposition"] = 'attachment; filename="asin_results.xlsx"'
-#     df.to_excel(response, index=False)
-
-#     return response
-
-    
