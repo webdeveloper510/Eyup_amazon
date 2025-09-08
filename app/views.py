@@ -105,20 +105,36 @@ def upload_asin_file(request):
                         "ASIN": asin,
                         "SELL_STATUS": sell_status,
                     })
-
+                    
                 # Create updated DataFrame
                 result_df = pd.DataFrame(results)
+                rows = result_df.to_dict(orient="records")
 
-                # Safe way to generate updated filename
+                # Save results in session for download
+                request.session["asin_results"] = rows
+                request.session.modified = True
+
+                # Optional: save updated Excel file on server
                 base, ext = os.path.splitext(file_path)
                 output_path = f"{base}_updated.xlsx"
-
-                # Delete old file if exists
                 if os.path.exists(output_path):
                     os.remove(output_path)
+                result_df.to_excel(output_path, index=False)    
+                    
 
-                result_df.to_excel(output_path, index=False)
-                rows = result_df.to_dict(orient="records")
+                # Create updated DataFrame
+                # result_df = pd.DataFrame(results)
+
+                # Safe way to generate updated filename
+                # base, ext = os.path.splitext(file_path)
+                # output_path = f"{base}_updated.xlsx"
+
+                # Delete old file if exists
+                # if os.path.exists(output_path):
+                #     os.remove(output_path)
+
+                # result_df.to_excel(output_path, index=False)
+                # rows = result_df.to_dict(orient="records")
 
         except Exception as e:
             error = str(e)
@@ -128,6 +144,7 @@ def upload_asin_file(request):
                 os.remove(file_path)
 
     return render(request, "app/upload_asin.html", {"rows": rows, "error": error})
+
 
 
 
@@ -147,5 +164,22 @@ def download_asin_results(request):
     df.to_excel(response, index=False)
 
     return response
+
+# def download_asin_results(request):
+#     """Download processed ASIN results as Excel"""
+#     asin_results = request.session.get("asin_results")
+#     if not asin_results:
+#         return HttpResponse("No results to download.", status=400)
+
+#     df = pd.DataFrame(asin_results)
+
+#     # Create Excel response
+#     response = HttpResponse(
+#         content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+#     )
+#     response["Content-Disposition"] = 'attachment; filename="asin_results.xlsx"'
+#     df.to_excel(response, index=False)
+
+#     return response
 
     
